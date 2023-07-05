@@ -1,0 +1,4 @@
+rootProject.name = 'spring-elk-microservice-log-demo'
+
+include 'demo-elk-log'
+include 'demo-elk-log-client'

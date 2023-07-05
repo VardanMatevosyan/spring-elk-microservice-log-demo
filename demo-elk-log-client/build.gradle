@@ -1,0 +1,12 @@
+plugins {
+	id 'org.springframework.boot' version '3.1.1'
+}
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'net.logstash.logback:logstash-logback-encoder'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+}
+

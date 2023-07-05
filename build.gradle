@@ -1,0 +1,74 @@
+plugins {
+	id 'org.springframework.boot' version '3.1.1'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'java'
+	id 'idea'
+}
+
+ext {
+	lombok = "1.18.22"
+	springBootVersion = "3.1.1"
+	logstashLogback = "7.2"
+}
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+}
+
+bootJar {
+	enabled = false
+}
+
+jar {
+	enabled = true
+}
+
+subprojects {
+	apply plugin: 'io.spring.dependency-management'
+	apply plugin: 'java'
+	apply plugin: 'idea'
+
+	group = 'com.elk-log'
+	version = '0.0.1-SNAPSHOT'
+
+	java {
+		sourceCompatibility = '17'
+	}
+
+	configurations {
+		compileOnly {
+			extendsFrom annotationProcessor
+		}
+	}
+
+	repositories {
+		mavenCentral()
+		mavenLocal()
+	}
+
+	dependencyManagement {
+
+		imports {
+			mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+		}
+
+		dependencies {
+			dependency "net.logstash.logback:logstash-logback-encoder:${logstashLogback}"
+			dependency "org.projectlombok:lombok:${lombok}"
+		}
+
+	}
+
+	dependencies {
+		annotationProcessor "org.projectlombok:lombok:${lombok}"
+	}
+
+	idea {
+		module {
+			downloadJavadoc = true
+			downloadSources = true
+		}
+	}
+}
+
