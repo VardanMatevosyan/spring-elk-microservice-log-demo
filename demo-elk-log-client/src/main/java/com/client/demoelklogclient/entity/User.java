@@ -1,5 +1,6 @@
 package com.client.demoelklogclient.entity;
 
+import com.client.demoelklogclient.constant.Indices;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Getter
 @Setter
 @ToString
-@Document(indexName = "user")
+@Document(indexName = "user_v2")
 public class User {
 
   @Id
@@ -26,6 +27,9 @@ public class User {
 
   @Field(type = FieldType.Text)
   String username;
+
+  @Field(type = FieldType.Keyword)
+  String testField;
 
   @Field(type = FieldType.Text)
   String email;
