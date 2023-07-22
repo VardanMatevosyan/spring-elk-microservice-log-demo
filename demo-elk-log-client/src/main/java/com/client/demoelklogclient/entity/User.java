@@ -1,8 +1,10 @@
 package com.client.demoelklogclient.entity;
 
+import static org.springframework.data.elasticsearch.annotations.DateFormat.date_hour_minute_second;
+
 import com.client.demoelklogclient.constant.Indices;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,14 +20,14 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Getter
 @Setter
 @ToString
-@Document(indexName = "user_v2")
+@Document(indexName = Indices.USER)
 public class User {
 
   @Id
   @Field(type = FieldType.Keyword)
   Long id;
 
-  @Field(type = FieldType.Text)
+  @Field
   String username;
 
   @Field(type = FieldType.Keyword)
@@ -33,6 +35,12 @@ public class User {
 
   @Field(type = FieldType.Text)
   String email;
+
+  @Field(type = FieldType.Date, format = date_hour_minute_second)
+  LocalDateTime created;
+
+  @Field(type = FieldType.Boolean)
+  Boolean updated;
 
   @Field(type = FieldType.Nested, dynamic = Dynamic.TRUE)
   List<LoggingData> loggingDatas = new ArrayList<>();

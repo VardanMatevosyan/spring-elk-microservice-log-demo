@@ -5,7 +5,7 @@ import com.client.demoelklogclient.entity.User;
 import com.client.demoelklogclient.service.UserLoggingService;
 import com.client.demoelklogclient.service.UserSearchService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Set;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,11 +38,11 @@ public class UserController {
   }
 
   @GetMapping("/users")
-  public ResponseEntity<Set<User>> searchUsers(@RequestBody SearchRequestDto searchRequest,
+  public ResponseEntity<List<User>> searchUsers(@RequestBody SearchRequestDto searchRequest,
                                               HttpServletRequest request) {
     log.info("TRACE_ID: %s. Searching users by request: %s."
         .formatted(request.getHeader("TRACE_ID"), searchRequest));
-    Set<User> users = userSearchService.searchUsers(searchRequest);
+    List<User> users = userSearchService.searchUsers(searchRequest);
     return ResponseEntity.ok(users);
   }
 

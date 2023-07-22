@@ -1,6 +1,5 @@
 package com.client.demoelklogclient.dto.request;
 
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +12,9 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SearchRequestDto {
+public class SortingDto {
 
-  String searchTerm;
-  List<String> fields;
-  SortingDto sortingDto;
+  String sortBy;
+  String order;
 
 }
