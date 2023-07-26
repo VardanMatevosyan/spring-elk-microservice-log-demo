@@ -5,12 +5,14 @@ import static java.util.Objects.nonNull;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query.Builder;
+import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.util.ObjectBuilder;
 import com.client.demoelklogclient.dto.request.FilteringDto;
 import com.client.demoelklogclient.dto.request.RangeDto;
 import com.client.demoelklogclient.dto.request.SearchRequestDto;
 import com.client.demoelklogclient.factory.SearchRequestFactory;
 import com.client.demoelklogclient.factory.SortFactory;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import lombok.AccessLevel;
@@ -48,7 +50,7 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
   }
 
   private NativeQuery buildFullTextSearchQuery(SearchRequestDto searchRequestDto) {
-    if (hasNestedObjectPath(searchRequestDto)) {
+    if (hasNestedObjectPath(searchRequestDto.getFields())) {
       return buildNestedObjectQuery(searchRequestDto);
     }
     return buildSimpleQuery(searchRequestDto);
@@ -59,9 +61,6 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
     return nonNull(fields) && !fields.isEmpty();
   }
 
-  private boolean hasNestedObjectPath(SearchRequestDto dto) {
-    return dto.getFields().iterator().next().split("\\.").length > 1;
-  }
 
   private NativeQuery buildSimpleQuery(SearchRequestDto dto) {
     NativeQueryBuilder queryBuilder = NativeQuery.builder().withQuery(buildQueryFunction(dto));
@@ -81,12 +80,27 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
       queryBuilder
           .withFilter(fq -> fq
               .bool(bq -> bq
-                  .must(mq -> mq
-                      .range(rq -> rq // todo range function factory builder or simple builder
-                          .field(dto.getField())
-                          .from(dto.getFrom())
-                          .to(dto.getTo())))));
+                  .must(mq -> buildMustQueryBuilder(dto, mq))));
     }
+  }
+
+  private ObjectBuilder<Query> buildMustQueryBuilder(RangeDto dto, Builder mq) {
+    if (hasNestedObjectPath(List.of(dto.getField()))) {
+      String parentPath = dto.getField().substring(0, dto.getField().indexOf("."));
+      return mq
+          .nested(nq -> nq
+              .path(parentPath)
+              .query(q -> q
+                  .range(rq -> buildRangeQueryBuilder(rq, dto))));
+    }
+    return mq.range(rq -> buildRangeQueryBuilder(rq, dto));
+  }
+
+  private ObjectBuilder<RangeQuery> buildRangeQueryBuilder(RangeQuery.Builder rq, RangeDto dto) {
+    return rq
+        .field(dto.getField())
+        .from(dto.getFrom())
+        .to(dto.getTo());
   }
 
   private NativeQuery buildNestedObjectQuery(SearchRequestDto dto) {
@@ -98,9 +112,7 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
                 .query(buildQueryFunction(dto))
                 .path(parentPath)));
     applySorting(dto, queryBuilder);
-
-    // todo nested object filtering
-
+    applyFiltering(dto.getFilteringDto(), queryBuilder);
     return queryBuilder.build();
   }
 
@@ -128,4 +140,12 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
   private boolean isMultiMatchRequest(SearchRequestDto dto) {
     return dto.getFields().size() > 1;
   }
+
+  private boolean hasNestedObjectPath(Collection<String> fieldPaths) {
+    return fieldPaths
+        .stream()
+        .map(field -> field.split("\\."))
+        .anyMatch(fields -> fields.length > 1);
+  }
+
 }
