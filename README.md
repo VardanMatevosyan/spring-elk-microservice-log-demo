@@ -22,3 +22,65 @@ where kibana allows to create a index pattern to see all the logs from the all s
 and observe, filter, sort the logs using kibana ui console.
 
 When open localhost:9200 in the browser elasticsearch sends back metadata information by the specified path. 
+
+Request examples:
+1. ### Search user document request.
+curl --location --request GET 'localhost:8078/users' \
+--header 'TRACE_ID: asdfasdf445345ertyfghst453t45y4' \
+--header 'Content-Type: application/json' \
+--data-raw 
+'
+```json
+{
+  "page": 1,
+  "size": 2,
+  "searchTerm": "INFO",
+  "fields": [
+    "loggingDatas.level"
+  ],
+  "sortingDto": {
+    "sortBy": "username.keyword",
+    "order": "ASC"
+  },
+  "filteringDto": {
+    "rangeDto": {
+      "field": "created",
+      "from": "2021-06-14T18:10:08",
+      "to": "2023-08-14T18:10:08"
+    }
+  }
+}
+
+```
+'
+
+----------------------------------------------------------------
+
+2. ### Create user document request.
+----------------------------------------------------------------
+curl --location --request POST 'localhost:8078/users' \
+--header 'TRACE_ID: asdfasdf445345ertyfghst453t45y4' \
+--header 'Content-Type: application/json' \
+--data-raw 
+'
+```json 
+{
+    "id": 37,
+    "username": "Vardan Matevosian",
+    "email": "vardanmt@gmail.com",
+    "testField": "Test word 1235",
+    "created": "2021-05-24T18:10:08",
+    "updated": false,
+    "loggingDatas": [
+        {
+            "id": 5,
+            "logTime": "2021-05-25T18:10:08",
+            "message": "This is the fifth log message",
+            "level": "INFO"
+        }
+    ]
+}
+```
+'
+
+----------------------------------------------------------------
