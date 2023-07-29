@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.stereotype.Service;
@@ -63,10 +64,18 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
 
 
   private NativeQuery buildSimpleQuery(SearchRequestDto dto) {
-    NativeQueryBuilder queryBuilder = NativeQuery.builder().withQuery(buildQueryFunction(dto));
+    NativeQueryBuilder queryBuilder = NativeQuery.builder()
+        .withQuery(buildQueryFunction(dto));
     applySorting(dto, queryBuilder);
     applyFiltering(dto.getFilteringDto(), queryBuilder);
+    applyPageable(dto, queryBuilder);
     return queryBuilder.build();
+  }
+
+  private void applyPageable(SearchRequestDto dto, NativeQueryBuilder queryBuilder) {
+    if (dto.getSize() > 0) {
+      queryBuilder.withPageable(Pageable.ofSize(dto.getSize()).withPage(dto.getPage()));
+    }
   }
 
   private void applyFiltering(FilteringDto dto, NativeQueryBuilder queryBuilder) {
@@ -113,6 +122,7 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
                 .path(parentPath)));
     applySorting(dto, queryBuilder);
     applyFiltering(dto.getFilteringDto(), queryBuilder);
+    applyPageable(dto, queryBuilder);
     return queryBuilder.build();
   }
 
@@ -137,10 +147,12 @@ public class SearchRequestFactoryImpl implements SearchRequestFactory {
             .operator(Operator.And));
   }
 
+  // todo this can be in separate util class
   private boolean isMultiMatchRequest(SearchRequestDto dto) {
     return dto.getFields().size() > 1;
   }
 
+  // todo this can be in separate util class
   private boolean hasNestedObjectPath(Collection<String> fieldPaths) {
     return fieldPaths
         .stream()
